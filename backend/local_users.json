@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "local_user_4uiif5b40",
+    "fullName": "Kevin Joe",
+    "email": "kevin@test.com",
+    "password": "$2b$12$9qLcTHWkgUSn6cJ7/LCJruKVEhqJf6wQaQNEqDWgBoYBT/lILOAbi",
+    "createdAt": "2026-06-26T12:38:29.691Z"
+  },
+  {
+    "_id": "local_user_fwkgkt45q",
+    "fullName": "KEVIN JOE S",
+    "email": "kevinjoe.s.2024.aiml@rajalakshmi.edu.in",
+    "password": "$2b$12$lyBY33pDupY7fZmEzzdP4eCl4rfoH1AcFfWN5JFnduwghJ42w1iIG",
+    "createdAt": "2026-06-26T12:55:49.231Z"
+  },
+  {
+    "_id": "local_user_jove3fxwg",
+    "fullName": "KEVIN JOE S",
+    "email": "kevinjoe@gmail.com",
+    "password": "$2b$12$/pE/Vhq820hqsFBoZskOp.tHN1wtIjKYwzmJUWs0MqQtLwpqJ42mW",
+    "createdAt": "2026-06-29T13:33:28.651Z"
+  }
+]
