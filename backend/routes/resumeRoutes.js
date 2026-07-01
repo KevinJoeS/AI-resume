@@ -7,8 +7,11 @@ import {
   deleteResume,
   updateResume,
 } from "../controllers/resumeController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+router.use(protect);
 
 router.post("/", createResume);
 router.get("/", getResumes);

@@ -35,6 +35,27 @@ const BLANK_RESUME = {
   },
 };
 
+const GUEST_RESUMES_KEY = "guest_resumes";
+
+const readGuestResumes = () => {
+  try {
+    return JSON.parse(localStorage.getItem(GUEST_RESUMES_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const writeGuestResumes = (resumes) => {
+  localStorage.setItem(GUEST_RESUMES_KEY, JSON.stringify(resumes));
+};
+
+const makeGuestResume = (resumeData) => ({
+  ...resumeData,
+  _id: `guest_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
+
 function App() {
   const { user, isGuest, loading, isAuthenticated, logout } = useAuth();
 
@@ -64,6 +85,11 @@ function App() {
   };
 
   const fetchResumes = async () => {
+    if (isGuest) {
+      setResumes(readGuestResumes());
+      return;
+    }
+
     try {
       const data = await getResumes();
       setResumes(data);
@@ -79,9 +105,18 @@ function App() {
       setResumes([]);
       setActiveResume(null);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isGuest]);
 
   const handleCreateResume = async () => {
+    if (isGuest) {
+      const newResume = makeGuestResume(BLANK_RESUME);
+      const nextResumes = [newResume, ...resumes];
+      writeGuestResumes(nextResumes);
+      setResumes(nextResumes);
+      setActiveResume(newResume);
+      return;
+    }
+
     try {
       const newResume = await createResume(BLANK_RESUME);
       setResumes((prev) => [newResume, ...prev]);
@@ -94,6 +129,20 @@ function App() {
 
   const handleSaveActiveResume = async () => {
     if (!activeResume || !activeResume._id) return;
+
+    if (isGuest) {
+      const updated = {
+        ...activeResume,
+        updatedAt: new Date().toISOString(),
+      };
+      const nextResumes = resumes.map((r) => (r._id === updated._id ? updated : r));
+      writeGuestResumes(nextResumes);
+      setResumes(nextResumes);
+      setActiveResume(updated);
+      alert("Resume saved successfully!");
+      return;
+    }
+
     try {
       const updated = await updateResume(activeResume._id, activeResume);
       setResumes((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
@@ -107,6 +156,15 @@ function App() {
 
   const handleDeleteResume = async (id) => {
     if (!window.confirm("Delete this resume? This cannot be undone.")) return;
+
+    if (isGuest) {
+      const nextResumes = resumes.filter((r) => r._id !== id);
+      writeGuestResumes(nextResumes);
+      setResumes(nextResumes);
+      if (activeResume && activeResume._id === id) setActiveResume(null);
+      return;
+    }
+
     try {
       await deleteResume(id);
       setResumes((prev) => prev.filter((r) => r._id !== id));
@@ -118,8 +176,21 @@ function App() {
   };
 
   const handleDuplicateResume = async (resume) => {
+    if (isGuest) {
+      const { _id, createdAt, updatedAt, userId, ...dupData } = resume;
+      const newResume = makeGuestResume({
+        ...dupData,
+        name: `${resume.name || "Untitled"} (Copy)`,
+      });
+      const nextResumes = [newResume, ...resumes];
+      writeGuestResumes(nextResumes);
+      setResumes(nextResumes);
+      alert("Resume duplicated!");
+      return;
+    }
+
     try {
-      const { _id, createdAt, updatedAt, ...dupData } = resume;
+      const { _id, createdAt, updatedAt, userId, ...dupData } = resume;
       const newResume = await createResume({
         ...dupData,
         name: `${resume.name || "Untitled"} (Copy)`,
