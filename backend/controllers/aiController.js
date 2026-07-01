@@ -43,7 +43,7 @@ const localEnhanceText = (text, instruction) => {
 };
 
 // Local fallback logic for Job Description Optimization
-const localOptimizeResume = (resumeData, jobDescription) => {
+const localOptimizeResume = (resumeData, jobDescription, resumeText = "") => {
   if (!jobDescription) {
     return {
       matchScore: 0,
@@ -54,24 +54,24 @@ const localOptimizeResume = (resumeData, jobDescription) => {
   }
 
   // Extract skills from resume
-  let resumeText = "";
+  let combinedResumeText = resumeText;
   if (resumeData.skills && Array.isArray(resumeData.skills)) {
-    resumeText += " " + resumeData.skills.join(" ");
+    combinedResumeText += " " + resumeData.skills.join(" ");
   }
-  if (resumeData.summary) resumeText += " " + resumeData.summary;
-  if (resumeData.role) resumeText += " " + resumeData.role;
+  if (resumeData.summary) combinedResumeText += " " + resumeData.summary;
+  if (resumeData.role) combinedResumeText += " " + resumeData.role;
   if (resumeData.experience) {
     resumeData.experience.forEach(exp => {
-      resumeText += ` ${exp.role} ${exp.company} ${exp.description}`;
+      combinedResumeText += ` ${exp.role} ${exp.company} ${exp.description}`;
     });
   }
   if (resumeData.projects) {
     resumeData.projects.forEach(proj => {
-      resumeText += ` ${proj.name} ${proj.description} ${proj.technologies}`;
+      combinedResumeText += ` ${proj.name} ${proj.description} ${proj.technologies}`;
     });
   }
 
-  const cleanResume = resumeText.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
+  const cleanResume = combinedResumeText.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
   const cleanJD = jobDescription.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
 
   // Common IT/Developer/Professional keywords to check
@@ -210,16 +210,16 @@ Text to enhance: '${text}'`;
 };
 
 export const optimizeResumeController = async (req, res) => {
-  const { resumeData, jobDescription } = req.body;
+  const { resumeData, jobDescription, resumeText = "" } = req.body;
 
-  if (!resumeData || !jobDescription) {
-    return res.status(400).json({ message: "Resume data and target job description are both required." });
+  if ((!resumeData && !resumeText) || !jobDescription) {
+    return res.status(400).json({ message: "Resume data or imported resume text and target job description are required." });
   }
 
   // Check if API Key is available
   if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes("YOUR_API_KEY") || process.env.GEMINI_API_KEY === "") {
     // Fallback to local simulator
-    const result = localOptimizeResume(resumeData, jobDescription);
+    const result = localOptimizeResume(resumeData || {}, jobDescription, resumeText);
     return res.status(200).json({ ...result, fallback: true });
   }
 
@@ -229,6 +229,9 @@ export const optimizeResumeController = async (req, res) => {
 
 Resume details:
 ${JSON.stringify(resumeData, null, 2)}
+
+Imported resume text:
+${resumeText || "(none)"}
 
 Job Description:
 ${jobDescription}
@@ -263,7 +266,7 @@ Return a valid JSON object matching the following structure. Do NOT include mark
   } catch (error) {
     console.error("Gemini API Error in optimizeResumeController:", error);
     // Silent fallback to local if API error occurs
-    const result = localOptimizeResume(resumeData, jobDescription);
+    const result = localOptimizeResume(resumeData || {}, jobDescription, resumeText);
     res.status(200).json({ ...result, fallback: true, error: error.message });
   }
 };
