@@ -19,5 +19,12 @@
     "email": "kevinjoe@gmail.com",
     "password": "$2b$12$/pE/Vhq820hqsFBoZskOp.tHN1wtIjKYwzmJUWs0MqQtLwpqJ42mW",
     "createdAt": "2026-06-29T13:33:28.651Z"
+  },
+  {
+    "_id": "local_user_j27wd4sph",
+    "fullName": "kevin joe",
+    "email": "007kevinjoe@gmail.com",
+    "password": "$2b$12$WtOXeY8fCDBYc4FQS67zxuMUILSbXZZswQcLA7syKy7B1DWdhaxT2",
+    "createdAt": "2026-06-30T13:41:58.875Z"
   }
 ]

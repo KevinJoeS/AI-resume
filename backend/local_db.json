@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "name": "New Resume",
+    "role": "",
+    "email": "",
+    "phone": "",
+    "website": "",
+    "linkedin": "",
+    "github": "",
+    "location": "",
+    "summary": "",
+    "experience": [],
+    "education": [],
+    "projects": [],
+    "skills": [],
+    "settings": {
+      "template": "modern",
+      "themeColor": "#6366f1",
+      "fontFamily": "Inter"
+    },
+    "_id": "local_owfst92gl",
+    "createdAt": "2026-06-30T13:42:30.591Z",
+    "updatedAt": "2026-06-30T13:42:30.591Z"
+  }
+]
