@@ -1,4 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
+import multer from "multer";
+import mammoth from "mammoth";
+import path from "path";
+import { PDFParse } from "pdf-parse";
+
+// ─── Multer config (memory storage, 5 MB limit) ───────────────────────────────
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = [".pdf", ".docx", ".txt"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error("Only PDF, DOCX, and TXT files are supported."));
+  },
+});
 
 // Standard action verbs for fallback polisher
 const ACTION_VERBS = ["Spearheaded", "orchestrated", "engineered", "optimized", "leveraged", "pioneered", "accelerated", "maximized", "formulated", "revamped"];
@@ -42,6 +58,20 @@ const localEnhanceText = (text, instruction) => {
   return enhanced;
 };
 
+// A solid list of English stop words to filter out non-skills/non-keywords
+const STOP_WORDS = new Set([
+  "the", "and", "a", "of", "to", "in", "for", "with", "on", "at", "by", "from", "an", "is", "are", 
+  "was", "were", "be", "been", "have", "has", "had", "do", "does", "did", "but", "if", "or", 
+  "because", "as", "until", "while", "about", "against", "between", "into", "through", "during", 
+  "before", "after", "above", "below", "up", "down", "out", "off", "over", "under", "again", 
+  "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", 
+  "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", 
+  "own", "same", "so", "than", "too", "very", "can", "will", "just", "should", "now",
+  "please", "you", "your", "we", "our", "us", "they", "them", "their", "he", "him", "his", "she", 
+  "her", "it", "its", "i", "me", "my", "myself", "yourself", "himself", "herself", "itself",
+  "who", "whom", "this", "that", "these", "those", "am", "being", "must", "shall", "would"
+]);
+
 // Local fallback logic for Job Description Optimization
 const localOptimizeResume = (resumeData, jobDescription, resumeText = "") => {
   if (!jobDescription) {
@@ -54,7 +84,7 @@ const localOptimizeResume = (resumeData, jobDescription, resumeText = "") => {
   }
 
   // Extract skills from resume
-  let combinedResumeText = resumeText;
+  let combinedResumeText = resumeText || "";
   if (resumeData.skills && Array.isArray(resumeData.skills)) {
     combinedResumeText += " " + resumeData.skills.join(" ");
   }
@@ -71,53 +101,56 @@ const localOptimizeResume = (resumeData, jobDescription, resumeText = "") => {
     });
   }
 
-  const cleanResume = combinedResumeText.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
-  const cleanJD = jobDescription.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
+  // Clean and split texts
+  const cleanText = (text) => {
+    return text.toLowerCase()
+      .replace(/[^a-zA-Z0-9\s-]/g, " ") // keep hyphens for words
+      .split(/[\s,]+/)
+      .map(w => w.trim())
+      .filter(w => w.length >= 3 && !STOP_WORDS.has(w) && !/^\d+$/.test(w));
+  };
 
-  // Common IT/Developer/Professional keywords to check
-  const checkKeywords = [
-    "react", "node", "express", "javascript", "typescript", "mongodb", "python", "java", "sql", "git",
-    "aws", "docker", "kubernetes", "agile", "scrum", "rest api", "graphql", "tailwind", "sass", "css",
-    "html", "devops", "cloud", "ui", "ux", "figma", "testing", "jest", "cicd", "microservices",
-    "communication", "teamwork", "leadership", "analytics", "marketing", "seo", "sales", "finance"
-  ];
+  const resumeWords = new Set(cleanText(combinedResumeText));
+  const jdWordsArray = cleanText(jobDescription);
+  
+  // Use unique words from JD to match
+  const jdWordsUnique = Array.from(new Set(jdWordsArray));
 
-  const resumeWords = new Set(cleanResume.split(/\s+/));
-  const jdWords = new Set(cleanJD.split(/\s+/));
-
-  // Find matches
   const matchingSkills = [];
   const missingKeywords = [];
 
-  checkKeywords.forEach(kw => {
-    const isMatched = resumeWords.has(kw);
-    const isInJD = jdWords.has(kw);
-
-    if (isInJD) {
-      if (isMatched) {
-        matchingSkills.push(kw.charAt(0).toUpperCase() + kw.slice(1));
-      } else {
-        missingKeywords.push(kw.charAt(0).toUpperCase() + kw.slice(1));
-      }
+  jdWordsUnique.forEach(word => {
+    // If the word matches a word in the resume, it's matching
+    if (resumeWords.has(word)) {
+      matchingSkills.push(word.charAt(0).toUpperCase() + word.slice(1));
+    } else {
+      missingKeywords.push(word.charAt(0).toUpperCase() + word.slice(1));
     }
   });
 
-  // Calculate score
-  const totalKeywordsInJD = matchingSkills.length + missingKeywords.length;
-  let matchScore = 40; // baseline
-  if (totalKeywordsInJD > 0) {
-    matchScore = Math.round((matchingSkills.length / totalKeywordsInJD) * 50 + 45);
+  // Calculate score based on actual keyword overlap
+  let matchScore = 0;
+  if (jdWordsUnique.length > 0) {
+    matchScore = Math.round((matchingSkills.length / jdWordsUnique.length) * 100);
   }
-  matchScore = Math.min(Math.max(matchScore, 15), 98); // clamp between 15% and 98% for realistic feel
+  
+  // Clamp score: max 98%
+  matchScore = Math.min(matchScore, 98);
 
   // Generate suggestions
   const suggestions = [];
 
-  if (matchScore < 70) {
+  if (matchScore < 30) {
     suggestions.push({
       field: "general",
       type: "warning",
-      message: `Your resume has a matching score of ${matchScore}%. We recommend incorporating more of the key terms found in the job description to bypass ATS filters.`
+      message: `Critically low match score of ${matchScore}%. This resume is highly incompatible with the target job description. Consider a complete rewrite or tailoring.`
+    });
+  } else if (matchScore < 70) {
+    suggestions.push({
+      field: "general",
+      type: "warning",
+      message: `Your resume has a moderate matching score of ${matchScore}%. We recommend incorporating more of the key terms found in the job description to bypass ATS filters.`
     });
   } else {
     suggestions.push({
@@ -131,34 +164,15 @@ const localOptimizeResume = (resumeData, jobDescription, resumeText = "") => {
     suggestions.push({
       field: "skills",
       type: "info",
-      message: `Consider adding these missing keywords to your Skills section: ${missingKeywords.slice(0, 5).join(", ")}.`
+      message: `Consider adding these missing keywords from the job description: ${missingKeywords.slice(0, 8).join(", ")}.`
     });
   }
 
-  if (!resumeData.summary || resumeData.summary.length < 50) {
+  if (!resumeText && (!resumeData.summary || resumeData.summary.length < 50)) {
     suggestions.push({
       field: "summary",
       type: "warning",
       message: "Your summary is empty or too short. Write a tailored 3-4 sentence professional summary summarizing your match with this role."
-    });
-  } else {
-    // Check if job title is in summary
-    const roleWords = (resumeData.role || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
-    const hasRoleInSummary = roleWords.some(w => resumeData.summary.toLowerCase().includes(w));
-    if (!hasRoleInSummary && resumeData.role) {
-      suggestions.push({
-        field: "summary",
-        type: "info",
-        message: `Tailor your Summary to explicitly mention your experience as a '${resumeData.role}' or similar target job titles.`
-      });
-    }
-  }
-
-  if (!resumeData.projects || resumeData.projects.length === 0) {
-    suggestions.push({
-      field: "projects",
-      type: "warning",
-      message: "Add at least 2 relevant projects showcasing the key technologies listed in the job description."
     });
   }
 
@@ -267,6 +281,100 @@ Return a valid JSON object matching the following structure. Do NOT include mark
     console.error("Gemini API Error in optimizeResumeController:", error);
     // Silent fallback to local if API error occurs
     const result = localOptimizeResume(resumeData || {}, jobDescription, resumeText);
+    res.status(200).json({ ...result, fallback: true, error: error.message });
+  }
+};
+
+// ─── Match Uploaded Resume Controller ────────────────────────────────────────
+export const matchUploadController = async (req, res) => {
+  const { jobDescription } = req.body;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ message: "Please upload a resume file (PDF, DOCX, or TXT)." });
+  }
+  if (!jobDescription || !jobDescription.trim()) {
+    return res.status(400).json({ message: "Please provide a job description to match against." });
+  }
+
+  // ── Extract plain text from the uploaded file ──────────────────────────────
+  let extractedText = "";
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  try {
+    if (ext === ".pdf") {
+      // Try pdf-parse first (text-based PDFs)
+      try {
+        const parser = new PDFParse({ data: file.buffer });
+        const parsed = await parser.getText();
+        await parser.destroy();
+        extractedText = parsed.text || "";
+      } catch (pdfErr) {
+        console.error("PDF parse error:", pdfErr);
+        return res.status(422).json({
+          message:
+            "The uploaded PDF does not contain extractable text (it may be a scanned image). Please upload a searchable PDF, or use DOCX/TXT instead."
+        });
+      }
+    } else if (ext === ".docx") {
+      const result = await mammoth.extractRawText({ buffer: file.buffer });
+      extractedText = result.value || "";
+    } else {
+      // Plain text
+      extractedText = file.buffer.toString("utf-8");
+    }
+  } catch (parseError) {
+    console.error("File parse error:", parseError);
+    return res.status(422).json({ message: "Could not extract text from the uploaded file. Please try a different format." });
+  }
+
+  if (!extractedText.trim()) {
+    return res.status(422).json({ message: "The uploaded file appears to be empty or could not be read." });
+  }
+
+  // ── Run optimizer (Gemini or local fallback) ──────────────────────────────
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes("YOUR_API_KEY") || process.env.GEMINI_API_KEY === "") {
+    const result = localOptimizeResume({}, jobDescription, extractedText);
+    return res.status(200).json({ ...result, fallback: true });
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const prompt = `You are an expert ATS (Applicant Tracking System) optimizer.
+Analyze the following resume text and match it against the target Job Description.
+
+Resume text:
+${extractedText}
+
+Job Description:
+${jobDescription}
+
+Evaluate the compatibility. Return ONLY a valid raw JSON object (no markdown fences) with this structure:
+{
+  "matchScore": <number 0-100>,
+  "matchingSkills": [<overlapping skill/keyword strings>],
+  "missingKeywords": [<important JD keywords missing from resume>],
+  "suggestions": [
+    {
+      "field": "<summary | skills | experience | projects | general>",
+      "type": "<warning | info | success>",
+      "message": "<actionable recommendation>"
+    }
+  ]
+}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: { responseMimeType: "application/json" },
+    });
+
+    const responseText = response.text || "{}";
+    const result = JSON.parse(responseText.trim());
+    res.status(200).json({ ...result, fallback: false });
+  } catch (error) {
+    console.error("Gemini API Error in matchUploadController:", error);
+    const result = localOptimizeResume({}, jobDescription, extractedText);
     res.status(200).json({ ...result, fallback: true, error: error.message });
   }
 };

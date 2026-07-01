@@ -63,3 +63,16 @@ export const optimizeResume = async (resumeData, jobDescription) => {
   const response = await axios.post(`${AI_URL}/optimize`, { resumeData, jobDescription }, { headers: getAuthHeaders() });
   return response.data;
 };
+
+export const matchUploadResume = async (file, jobDescription) => {
+  const formData = new FormData();
+  formData.append("resume", file);
+  formData.append("jobDescription", jobDescription);
+  const response = await axios.post(`${AI_URL}/match-upload`, formData, {
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};

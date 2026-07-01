@@ -60,10 +60,6 @@ export default function Login() {
 
   return (
     <div style={styles.pageWrapper}>
-      {/* Animated background blobs */}
-      <div style={styles.blob1} />
-      <div style={styles.blob2} />
-      <div style={styles.blob3} />
 
       <div style={styles.container}>
         {/* Left Panel — Branding */}
@@ -81,13 +77,13 @@ export default function Login() {
 
           <div style={styles.featureList}>
             {[
-              { icon: "", text: "AI-powered text enhancement" },
-              { icon: "", text: "ATS job match analyzer" },
-              { icon: "", text: "3 premium resume templates" },
-              { icon: "", text: "Cloud-saved to your account" },
+              { text: "AI-powered text enhancement" },
+              { text: "ATS job match analyzer" },
+              { text: "3 premium resume templates" },
+              { text: "Cloud-saved to your account" },
             ].map((feat, i) => (
               <div key={i} style={styles.featureItem}>
-                <span style={styles.featureIcon}>{feat.icon}</span>
+                <span style={styles.featureIcon}></span>
                 <span style={styles.featureText}>{feat.text}</span>
               </div>
             ))}
@@ -191,7 +187,7 @@ export default function Login() {
               <div style={styles.fieldWrapper} className="auth-field-animate">
                 <label style={styles.label}>Confirm Password</label>
                 <div style={styles.inputWrap}>
-                  <span style={styles.inputIcon}>🔒</span>
+                  <span style={styles.inputIcon}></span>
                   <input
                     id="auth-confirmPassword"
                     type={showPassword ? "text" : "password"}

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
+import IMatcherModal from "./IMatcherModal";
 
 function Dashboard({ resumes, onCreate, onSelect, onDelete, onDuplicate }) {
+  const [showIMatcher, setShowIMatcher] = useState(false);
   const totalResumes = resumes.length;
   
   // Find the last modified resume
@@ -20,6 +22,7 @@ function Dashboard({ resumes, onCreate, onSelect, onDelete, onDuplicate }) {
   const randomTip = tips[Math.floor((new Date().getDay()) % tips.length)];
 
   return (
+    <>
     <div className="dashboard-container animate-fade-in">
       <div className="dashboard-hero glass-panel">
         <h2>Welcome to your AI Resume Workspace</h2>
@@ -52,12 +55,29 @@ function Dashboard({ resumes, onCreate, onSelect, onDelete, onDuplicate }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Your Resumes</h3>
-        <button className="btn btn-primary" onClick={() => onCreate()}>
-          Create New Resume
-        </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            className="btn btn-imatcher"
+            onClick={() => setShowIMatcher(true)}
+          >
+            🎯 iMatcher
+          </button>
+          <button className="btn btn-primary" onClick={() => onCreate()}>
+            Create New Resume
+          </button>
+        </div>
       </div>
 
       <div className="resume-grid">
+        {/* iMatcher Card */}
+        <div className="imatcher-grid-card" onClick={() => setShowIMatcher(true)}>
+          <div className="imatcher-grid-card-icon">🎯</div>
+          <span style={{ fontWeight: "700", fontSize: "0.95rem" }}>iMatcher</span>
+          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "4px", textAlign: "center" }}>
+            Upload any resume &amp; match it to a job
+          </span>
+        </div>
+
         {/* Create Card */}
         <div className="create-card" onClick={() => onCreate()}>
           <div className="create-card-icon">+</div>
@@ -118,6 +138,9 @@ function Dashboard({ resumes, onCreate, onSelect, onDelete, onDuplicate }) {
         })}
       </div>
     </div>
+
+    {showIMatcher && <IMatcherModal onClose={() => setShowIMatcher(false)} />}
+    </>
   );
 }
 

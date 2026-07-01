@@ -748,3 +748,310 @@
     padding: 10mm;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   iMatcher — Button, Grid Card, Modal
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Header-level iMatcher button (teal/cyan accent) */
+.btn-imatcher {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+.btn-imatcher:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.5);
+  filter: brightness(1.1);
+}
+.btn-imatcher:active {
+  transform: translateY(0);
+}
+
+/* Dashboard grid card for iMatcher */
+.imatcher-grid-card {
+  border: 2px solid rgba(14, 165, 233, 0.35);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg,
+    rgba(14, 165, 233, 0.06) 0%,
+    rgba(99, 102, 241, 0.06) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  cursor: pointer;
+  gap: 8px;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.imatcher-grid-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(14,165,233,0.12) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.imatcher-grid-card:hover::before {
+  opacity: 1;
+}
+.imatcher-grid-card:hover {
+  border-color: #0ea5e9;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.2);
+}
+.imatcher-grid-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 8px rgba(14,165,233,0.5));
+}
+
+/* ── Modal Overlay ── */
+.imatcher-overlay {
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.imatcher-modal {
+  width: 100%;
+  max-width: 680px;
+  margin: auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(14,165,233,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.imatcher-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg,
+    rgba(14, 165, 233, 0.08) 0%,
+    rgba(99, 102, 241, 0.05) 100%);
+}
+
+.imatcher-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 14px rgba(14,165,233,0.4);
+  flex-shrink: 0;
+}
+
+/* ── Step Indicator ── */
+.imatcher-steps {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px 12px;
+  gap: 0;
+}
+.imatcher-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color 0.25s;
+}
+.imatcher-step span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: background 0.25s, color 0.25s;
+}
+.imatcher-step.active {
+  color: #0ea5e9;
+}
+.imatcher-step.active span {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #fff;
+}
+.imatcher-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 12px;
+  border-radius: 2px;
+}
+
+.imatcher-body {
+  padding: 20px 24px 24px;
+  flex: 1;
+}
+
+/* ── Drag & Drop Zone ── */
+.imatcher-dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  background: rgba(255,255,255,0.01);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  user-select: none;
+}
+.imatcher-dropzone:hover,
+.imatcher-dropzone:focus {
+  border-color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.04);
+  outline: none;
+}
+.imatcher-dropzone.dragging {
+  border-color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.08);
+  transform: scale(1.01);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+.imatcher-dropzone.has-file {
+  border-color: rgba(16, 185, 129, 0.5);
+  border-style: solid;
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.imatcher-file-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+.imatcher-file-badge {
+  margin-left: auto;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.imatcher-format-badges {
+  display: flex;
+  gap: 8px;
+}
+.imatcher-format-badges span {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-light);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ── Error Banner ── */
+.imatcher-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--danger-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  margin-top: 12px;
+}
+
+/* ── Run Button Loading State ── */
+.imatcher-run-btn {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+}
+.imatcher-run-btn:not(:disabled):hover {
+  box-shadow: 0 6px 22px rgba(14, 165, 233, 0.5);
+  filter: brightness(1.08);
+}
+.imatcher-run-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.imatcher-loading-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.imatcher-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Result Chips ── */
+.imatcher-chip {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.imatcher-chip-match {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.imatcher-chip-missing {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .imatcher-overlay {
+    padding: 8px;
+  }
+  .imatcher-modal {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+  .imatcher-header {
+    padding: 14px 16px;
+  }
+  .imatcher-body {
+    padding: 14px 16px 20px;
+  }
+  .imatcher-steps {
+    padding: 12px 16px 8px;
+  }
+  .imatcher-file-info {
+    flex-direction: column;
+    text-align: center;
+  }
+}
