@@ -81,10 +81,10 @@ export default function Login() {
 
           <div style={styles.featureList}>
             {[
-              { icon: "✨", text: "AI-powered text enhancement" },
-              { icon: "🎯", text: "ATS job match analyzer" },
-              { icon: "📄", text: "3 premium resume templates" },
-              { icon: "💾", text: "Cloud-saved to your account" },
+              { icon: "", text: "AI-powered text enhancement" },
+              { icon: "", text: "ATS job match analyzer" },
+              { icon: "", text: "3 premium resume templates" },
+              { icon: "", text: "Cloud-saved to your account" },
             ].map((feat, i) => (
               <div key={i} style={styles.featureItem}>
                 <span style={styles.featureIcon}>{feat.icon}</span>
@@ -113,7 +113,7 @@ export default function Login() {
           </div>
 
           <h2 style={styles.formTitle}>
-            {mode === "login" ? "Welcome back 👋" : "Create your account"}
+            {mode === "login" ? "Welcome back " : "Create your account"}
           </h2>
           <p style={styles.formSubtitle}>
             {mode === "login"
@@ -127,7 +127,7 @@ export default function Login() {
               <div style={styles.fieldWrapper} className="auth-field-animate">
                 <label style={styles.label}>Full Name</label>
                 <div style={styles.inputWrap}>
-                  <span style={styles.inputIcon}>👤</span>
+                  <span style={styles.inputIcon}></span>
                   <input
                     id="auth-fullName"
                     type="text"
@@ -146,7 +146,7 @@ export default function Login() {
             <div style={styles.fieldWrapper}>
               <label style={styles.label}>Email Address</label>
               <div style={styles.inputWrap}>
-                <span style={styles.inputIcon}>✉️</span>
+                <span style={styles.inputIcon}></span>
                 <input
                   id="auth-email"
                   type="email"
@@ -164,7 +164,7 @@ export default function Login() {
             <div style={styles.fieldWrapper}>
               <label style={styles.label}>Password</label>
               <div style={styles.inputWrap}>
-                <span style={styles.inputIcon}>🔒</span>
+                <span style={styles.inputIcon}></span>
                 <input
                   id="auth-password"
                   type={showPassword ? "text" : "password"}
@@ -181,7 +181,7 @@ export default function Login() {
                   style={styles.eyeBtn}
                   tabIndex={-1}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? "" : ""}
                 </button>
               </div>
             </div>

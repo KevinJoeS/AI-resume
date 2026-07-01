@@ -1,17 +1,18 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is missing. Add it to backend/.env before starting the server.");
+  }
 
-    console.log("MongoDB Connected");
+  try {
+    const connection = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+    });
+
+    console.log(`MongoDB Connected: ${connection.connection.name}`);
   } catch (error) {
-    console.warn("====================================================================");
-    console.warn("WARNING: MongoDB Connection Failed! IP Whitelist or connection issue.");
-    console.warn("Falling back to local file database (local_db.json) in backend folder.");
-    console.warn("Error message:", error.message);
-    console.warn("====================================================================");
-    // Do not call process.exit(1); let server run in fallback mode.
+    throw new Error(`MongoDB connection failed: ${error.message}`);
   }
 };
 

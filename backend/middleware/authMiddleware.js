@@ -18,15 +18,15 @@ export const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Check if Mongoose is connected
-    if (mongoose.connection.readyState === 1) {
-      req.user = await User.findById(decoded.id).select("-password");
-      if (!req.user) {
-        return res.status(401).json({ message: "User belonging to this token no longer exists." });
-      }
-    } else {
-      // Fallback mode: attach userId from token
-      req.user = { _id: decoded.id, email: decoded.email, fullName: decoded.fullName };
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        message: "Database is not connected. Please check MONGO_URI and restart the backend.",
+      });
+    }
+
+    req.user = await User.findById(decoded.id).select("-password");
+    if (!req.user) {
+      return res.status(401).json({ message: "User belonging to this token no longer exists." });
     }
 
     next();
